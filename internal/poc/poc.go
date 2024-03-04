@@ -24,11 +24,17 @@ func NewPoc(baseUrl string, pocTypes []string) (*Poc, error) {
 		Payloads: []BasePayload{},
 	}
 	if slices.Contains(pocTypes, "ALL") {
-		poc.Payloads = append(poc.Payloads, thinkphp.NewTP3Module(baseUrl))
+		poc.Payloads = append(poc.Payloads,
+			thinkphp.NewTP3Module(baseUrl),
+			thinkphp.NewTP3LogModule(baseUrl),
+			thinkphp.NewTP3LogRceModule(baseUrl))
 		return poc, nil
 	}
 	if slices.Contains(pocTypes, "Thinkphp") {
-		poc.Payloads = append(poc.Payloads, thinkphp.NewTP3Module(baseUrl))
+		poc.Payloads = append(poc.Payloads,
+			thinkphp.NewTP3Module(baseUrl),
+			thinkphp.NewTP3LogModule(baseUrl),
+			thinkphp.NewTP3LogRceModule(baseUrl))
 	}
 	return poc, nil
 }
