@@ -17,16 +17,17 @@ limitations under the License.
 package cmd
 
 import (
-	"breach/internal/poc/thinkphp"
+	"breach/internal/poc"
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 )
 
 var target string
-var filepath string
+var file string
 var pocType string
 
 // pocCmd represents the poc command
@@ -38,12 +39,20 @@ var pocCmd = &cobra.Command{
 			fmt.Println("Error: Please specify a target URL using -t or -f")
 			return
 		}
+		pocTypes := strings.Split(pocType, ",")
 		if target != "" {
-			tpModule := thinkphp.NewTPModule(target)
-			response := tpModule.CheckVul()
-			fmt.Printf("%s:%s\n", target, response.Message)
+			newPoc, err := poc.NewPoc(target, pocTypes)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			for _, payload := range newPoc.Payloads {
+				response := payload.CheckVul()
+				fmt.Printf("%s\t%s\n", target, response.Message)
+			}
 		} else {
-			bytes, err := os.ReadFile(filepath)
+			fullPath, err := filepath.Abs(file)
+			bytes, err := os.ReadFile(fullPath)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -51,14 +60,20 @@ var pocCmd = &cobra.Command{
 			lines := strings.Split(fileContent, "\n")
 			w := sync.WaitGroup{}
 			for _, line := range lines {
-				if line != "" {
+				if strings.TrimSpace(line) != "" {
 					w.Add(1)
-					go func() {
-						tpModule := thinkphp.NewTPModule(line)
-						response := tpModule.CheckVul()
-						fmt.Println(response.Message)
+					go func(t string) {
+						newPoc, err := poc.NewPoc(t, pocTypes)
+						if err != nil {
+							fmt.Println(err)
+							return
+						}
+						for _, payload := range newPoc.Payloads {
+							response := payload.CheckVul()
+							fmt.Printf("%s\t%s\n", t, response.Message)
+						}
 						w.Done()
-					}()
+					}(line)
 				}
 			}
 			w.Wait()
@@ -69,6 +84,6 @@ var pocCmd = &cobra.Command{
 func init() {
 	scanCmd.AddCommand(pocCmd)
 	pocCmd.Flags().StringVarP(&target, "target", "t", "", "target URL")
-	pocCmd.Flags().StringVarP(&filepath, "filepath", "f", "", "batch target URLs")
+	pocCmd.Flags().StringVarP(&file, "file", "f", "", "batch target URLs")
 	pocCmd.Flags().StringVarP(&pocType, "poc-type", "", "ALL", "POC type: ALL, Thinkphp")
 }
