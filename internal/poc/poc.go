@@ -27,14 +27,32 @@ func NewPoc(baseUrl string, pocTypes []string) (*Poc, error) {
 		poc.Payloads = append(poc.Payloads,
 			thinkphp.NewTP3Module(baseUrl),
 			thinkphp.NewTP3LogModule(baseUrl),
-			thinkphp.NewTP3LogRceModule(baseUrl))
+			thinkphp.NewTP3LogRceModule(baseUrl),
+			thinkphp.NewTP50Module(baseUrl),
+			thinkphp.NewTP5010(baseUrl),
+			thinkphp.NewTP50225129Module(baseUrl),
+			thinkphp.NewTP5023Module(baseUrl),
+			thinkphp.NewTP50245130(baseUrl),
+			thinkphp.NewTP5DBModule(baseUrl),
+			thinkphp.NewTP5LogModule(baseUrl),
+			thinkphp.NewTP6LogModule(baseUrl),
+		)
 		return poc, nil
 	}
 	if slices.Contains(pocTypes, "Thinkphp") {
 		poc.Payloads = append(poc.Payloads,
 			thinkphp.NewTP3Module(baseUrl),
 			thinkphp.NewTP3LogModule(baseUrl),
-			thinkphp.NewTP3LogRceModule(baseUrl))
+			thinkphp.NewTP3LogRceModule(baseUrl),
+			thinkphp.NewTP50Module(baseUrl),
+			thinkphp.NewTP5010(baseUrl),
+			thinkphp.NewTP50225129Module(baseUrl),
+			thinkphp.NewTP5023Module(baseUrl),
+			thinkphp.NewTP50245130(baseUrl),
+			thinkphp.NewTP5DBModule(baseUrl),
+			thinkphp.NewTP5LogModule(baseUrl),
+			thinkphp.NewTP6LogModule(baseUrl),
+		)
 	}
 	return poc, nil
 }

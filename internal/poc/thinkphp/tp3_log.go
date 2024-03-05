@@ -2,6 +2,7 @@ package thinkphp
 
 import (
 	"breach/internal/util"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -13,19 +14,18 @@ type TP3LogModule struct {
 	BaseUrl            string
 	feature            string
 	checkVulPayloadUrl []string
-	execVulPayloadUrl  string
 	checkStr           string
 	checkError         string
 }
 
 func NewTP3LogModule(baseUrl string) *TP3LogModule {
 	now := time.Now()
-	year := string(rune(now.Year()))
-	month := string(rune(now.Month()))
-	day := string(rune(now.Day()))
+	year := now.Year()
+	month := now.Month()
+	day := now.Day()
 	timestamp := strconv.FormatInt(now.Unix()/1000, 10)
-	suffix1 := year[2:4] + "_" + month + "_" + day + "_" + ".log"
-	suffix2 := timestamp + "-" + year[2:4] + "_" + month + "_" + day + "_" + ".log"
+	suffix1 := fmt.Sprintf("%d_%02d_%02d.log", year, month, day)
+	suffix2 := fmt.Sprintf("%s-%d_%02d_%02d.log", timestamp, year, month, day)
 	checkVulPayloadUrl := make([]string, 0)
 	p := []string{
 		"/Runtime/Logs/",
@@ -51,6 +51,8 @@ func NewTP3LogModule(baseUrl string) *TP3LogModule {
 		BaseUrl:            baseUrl,
 		feature:            "ThinkPHP 3.x 日志泄露",
 		checkVulPayloadUrl: checkVulPayloadUrl,
+		checkStr:           "INFO:",
+		checkError:         "[ error ]",
 	}
 }
 
@@ -66,7 +68,7 @@ func (t *TP3LogModule) CheckVul() *util.Response {
 			return util.Fail(err.Error())
 		}
 		if strings.Contains(string(bytes), t.checkStr) || strings.Contains(string(bytes), t.checkError) {
-			return util.Success("ThinkPHP 3.x Log RCE", payloadUrl)
+			return util.Success(t.feature, payloadUrl)
 		}
 	}
 	return util.Fail("no vulnerable")

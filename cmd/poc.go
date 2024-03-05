@@ -48,7 +48,9 @@ var pocCmd = &cobra.Command{
 			}
 			for _, payload := range newPoc.Payloads {
 				response := payload.CheckVul()
-				fmt.Printf("%s\t%s\n", target, response.Message)
+				if response.Code == 0 {
+					fmt.Printf("%s\t%s\t%s\n", target, response.Message, response.Data)
+				}
 			}
 		} else {
 			fullPath, err := filepath.Abs(file)
@@ -70,7 +72,9 @@ var pocCmd = &cobra.Command{
 						}
 						for _, payload := range newPoc.Payloads {
 							response := payload.CheckVul()
-							fmt.Printf("%s\t%s\n", t, response.Message)
+							if response.Code == 0 {
+								fmt.Printf("%s\t%s\t%s\n", t, response.Message, response.Data)
+							}
 						}
 						w.Done()
 					}(line)

